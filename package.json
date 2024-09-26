@@ -1,0 +1,23 @@
+{
+  "name": "encoding-time-series-data",
+  "version": "1.0.0",
+  "main": "app.ts",
+  "scripts": {
+    "start": "node --import=tsx app.ts"
+  },
+  "author": "jessemcdowell",
+  "license": "MIT",
+  "type": "module",
+  "devDependencies": {
+    "@types/compression": "^1.7.5",
+    "@types/express": "^4.17.21",
+    "@types/node": "^22.5.5",
+    "tsx": "^4.19.1",
+    "typescript": "^5.6.2"
+  },
+  "dependencies": {
+    "axios": "^1.7.7",
+    "compression": "^1.7.4",
+    "express": "^4.21.0"
+  }
+}
