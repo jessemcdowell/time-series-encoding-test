@@ -1,9 +1,9 @@
 {
-  "name": "encoding-time-series-data",
+  "name": "time-series-encoding-test",
   "version": "1.0.0",
-  "main": "encoding-time-series-data.ts",
+  "main": "time-series-encoding-test.ts",
   "scripts": {
-    "start": "node --import=tsx encoding-time-series-data.ts"
+    "start": "node --import=tsx time-series-encoding-test.ts"
   },
   "author": "jessemcdowell",
   "license": "MIT",
