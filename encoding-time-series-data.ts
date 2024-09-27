@@ -60,6 +60,15 @@ app.get(`/:pointCount(\\d+)/binary/:structure(pairs|sets)/:encoding(raw|base64)`
     response.send(encoding === 'base64' ? data.toString('base64') : data);
 });
 
+app.get('/:pointCount(\\d+)/:decimalPlaces(\\d+)/csv', (request, response) => {
+    const {pointCount, decimalPlaces} = request.params;
+    const points = generatePoints(parseInt(pointCount), parseInt(decimalPlaces));
+    const data = 'time,value\n' + points.map(point => `${point.time.toISOString()},${point.value}`).join('\n');
+
+    response.type('text/csv');
+    response.send(data);
+});
+
 async function runTests(baseUrl: string) {
     async function getResponseLength(path: string, options: Partial<AxiosRequestConfig> = {}): Promise<number> {
         let loaded = 0;
@@ -76,6 +85,9 @@ async function runTests(baseUrl: string) {
 
     console.info(`1m/5, json, no compression: ${await getResponseLength('/1000000/5', disableCompression)}`);
     console.info(`1m/5, json, gzip:           ${await getResponseLength('/1000000/5')}`);
+
+    console.info(`1m/5, csv, no compression: ${await getResponseLength('/1000000/5/csv', disableCompression)}`);
+    console.info(`1m/5, csv, gzip:           ${await getResponseLength('/1000000/5/csv')}`);
 
     console.info(`1m/5, binary pairs, no compression: ${await getResponseLength('/1000000/binary/pairs/raw', disableCompression)}`);
     console.info(`1m/5, binary pairs, gzip:           ${await getResponseLength('/1000000/binary/pairs/raw')}`);
