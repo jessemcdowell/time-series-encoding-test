@@ -1,9 +1,9 @@
 {
   "name": "encoding-time-series-data",
   "version": "1.0.0",
-  "main": "app.ts",
+  "main": "encoding-time-series-data.ts",
   "scripts": {
-    "start": "node --import=tsx app.ts"
+    "start": "node --import=tsx encoding-time-series-data.ts"
   },
   "author": "jessemcdowell",
   "license": "MIT",
