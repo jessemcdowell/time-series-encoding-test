@@ -47,12 +47,12 @@ function encodeBinarySets(points: Point[]): Buffer {
 const app = express();
 app.use(compression());
 
-app.get('/:pointCount(\\d+)/:decimalPlaces(\\d+)', (request, response) => {
+app.get('/json/:pointCount(\\d+)/:decimalPlaces(\\d+)', (request, response) => {
     const {pointCount, decimalPlaces} = request.params;
     response.send(generatePoints(parseInt(pointCount), parseInt(decimalPlaces)));
 });
 
-app.get(`/:pointCount(\\d+)/binary/:structure(pairs|sets)/:encoding(raw|base64)`, (request, response) => {
+app.get(`/binary/:structure(pairs|sets)/:encoding(raw|base64)/:pointCount(\\d+)`, (request, response) => {
     const {pointCount, structure, encoding} = request.params;
     const pointData = generatePoints(parseInt(pointCount), 5);
     const data = structure === 'pairs' ? encodeBinaryPairs(pointData) : encodeBinarySets(pointData);
@@ -60,7 +60,7 @@ app.get(`/:pointCount(\\d+)/binary/:structure(pairs|sets)/:encoding(raw|base64)`
     response.send(encoding === 'base64' ? data.toString('base64') : data);
 });
 
-app.get('/:pointCount(\\d+)/:decimalPlaces(\\d+)/csv', (request, response) => {
+app.get('/csv/:pointCount(\\d+)/:decimalPlaces(\\d+)', (request, response) => {
     const {pointCount, decimalPlaces} = request.params;
     const points = generatePoints(parseInt(pointCount), parseInt(decimalPlaces));
     const data = 'time,value\n' + points.map(point => `${point.time.toISOString()},${point.value}`).join('\n');
@@ -83,19 +83,19 @@ async function runTests(baseUrl: string) {
 
     console.info('running tests...');
 
-    console.info(`1m/5, json, no compression: ${await getResponseLength('/1000000/5', disableCompression)}`);
-    console.info(`1m/5, json, gzip:           ${await getResponseLength('/1000000/5')}`);
+    console.info(`json, no compression: ${await getResponseLength('/json/1000000/5', disableCompression)}`);
+    console.info(`json, gzip:           ${await getResponseLength('/json/1000000/5')}`);
 
-    console.info(`1m/5, csv, no compression: ${await getResponseLength('/1000000/5/csv', disableCompression)}`);
-    console.info(`1m/5, csv, gzip:           ${await getResponseLength('/1000000/5/csv')}`);
+    console.info(`csv, no compression: ${await getResponseLength('/csv/1000000/5', disableCompression)}`);
+    console.info(`csv, gzip:           ${await getResponseLength('/csv/1000000/5')}`);
 
-    console.info(`1m/5, binary pairs, no compression: ${await getResponseLength('/1000000/binary/pairs/raw', disableCompression)}`);
-    console.info(`1m/5, binary pairs, gzip:           ${await getResponseLength('/1000000/binary/pairs/raw')}`);
-    console.info(`1m/5, binary sets, gzip:            ${await getResponseLength('/1000000/binary/sets/raw')}`);
+    console.info(`binary pairs, no compression: ${await getResponseLength('/binary/pairs/raw/1000000', disableCompression)}`);
+    console.info(`binary pairs, gzip:           ${await getResponseLength('/binary/pairs/raw/1000000')}`);
+    console.info(`binary sets, gzip:            ${await getResponseLength('/binary/sets/raw/1000000')}`);
 
-    console.info(`1m/5, base64 pairs, no compression: ${await getResponseLength('/1000000/binary/pairs/base64', disableCompression)}`);
-    console.info(`1m/5, base64 pairs, gzip:           ${await getResponseLength('/1000000/binary/pairs/base64')}`);
-    console.info(`1m/5, base64 sets, gzip:            ${await getResponseLength('/1000000/binary/sets/base64')}`);
+    console.info(`base64 pairs, no compression: ${await getResponseLength('/binary/pairs/base64/1000000', disableCompression)}`);
+    console.info(`base64 pairs, gzip:           ${await getResponseLength('/binary/pairs/base64/1000000')}`);
+    console.info(`base64 sets, gzip:            ${await getResponseLength('/binary/sets/base64/1000000')}`);
 }
 
 const server = app.listen(0, 'localhost', () => {
