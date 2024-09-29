@@ -1,5 +1,6 @@
 import express from 'express';
 import compression from 'compression';
+import msgpack from 'express-msgpack'
 import { AddressInfo } from 'node:net';
 import axios, { AxiosRequestConfig } from "axios";
 
@@ -46,8 +47,9 @@ function encodeBinarySets(points: Point[]): Buffer {
 
 const app = express();
 app.use(compression());
+app.use(msgpack());
 
-app.get('/json/:pointCount(\\d+)/:decimalPlaces(\\d+)', (request, response) => {
+app.get('/:pointCount(\\d+)/:decimalPlaces(\\d+)', (request, response) => {
     const {pointCount, decimalPlaces} = request.params;
     response.send(generatePoints(parseInt(pointCount), parseInt(decimalPlaces)));
 });
@@ -80,11 +82,14 @@ async function runTests(baseUrl: string) {
     }
 
     const disableCompression = {headers: {'Accept-Encoding': ''}};
+    const msgPack = {headers: {'Accept': 'application/msgpack'}};
 
     console.info('running tests...');
 
-    console.info(`json, no compression: ${await getResponseLength('/json/1000000/5', disableCompression)}`);
-    console.info(`json, gzip:           ${await getResponseLength('/json/1000000/5')}`);
+    console.info(`json, no compression: ${await getResponseLength('/1000000/5', disableCompression)}`);
+    console.info(`json, gzip:           ${await getResponseLength('/1000000/5')}`);
+
+    console.info(`msgpack, no compression: ${await getResponseLength('/1000000/5', {headers: {...msgPack.headers, ...disableCompression.headers}})}`);
 
     console.info(`csv, no compression: ${await getResponseLength('/csv/1000000/5', disableCompression)}`);
     console.info(`csv, gzip:           ${await getResponseLength('/csv/1000000/5')}`);
