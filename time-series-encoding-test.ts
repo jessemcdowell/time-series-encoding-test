@@ -46,7 +46,7 @@ function encodeBinarySets(points: Point[]): Buffer {
 }
 
 const app = express();
-app.use(compression());
+app.use(compression({filter: (req, res) => req.headers['accept-encoding']?.indexOf('gzip') !== -1}));
 app.use(msgpack());
 
 app.get('/:pointCount(\\d+)/:decimalPlaces(\\d+)', (request, response) => {
@@ -82,25 +82,27 @@ async function runTests(baseUrl: string) {
     }
 
     const disableCompression = {headers: {'Accept-Encoding': ''}};
+    const gzip = {headers: {'Accept-Encoding': 'gzip'}};
     const msgPack = {headers: {'Accept': 'application/msgpack'}};
 
     console.info('running tests...');
 
     console.info(`json, no compression: ${await getResponseLength('/1000000/5', disableCompression)}`);
-    console.info(`json, gzip:           ${await getResponseLength('/1000000/5')}`);
+    console.info(`json, gzip:           ${await getResponseLength('/1000000/5', gzip)}`);
 
     console.info(`msgpack, no compression: ${await getResponseLength('/1000000/5', {headers: {...msgPack.headers, ...disableCompression.headers}})}`);
+    console.info(`msgpack, gzip: ${await getResponseLength('/1000000/5', {headers: {...msgPack.headers, ...gzip.headers}})}`);
 
     console.info(`csv, no compression: ${await getResponseLength('/csv/1000000/5', disableCompression)}`);
-    console.info(`csv, gzip:           ${await getResponseLength('/csv/1000000/5')}`);
+    console.info(`csv, gzip:           ${await getResponseLength('/csv/1000000/5', gzip)}`);
 
     console.info(`binary pairs, no compression: ${await getResponseLength('/binary/pairs/raw/1000000', disableCompression)}`);
-    console.info(`binary pairs, gzip:           ${await getResponseLength('/binary/pairs/raw/1000000')}`);
-    console.info(`binary sets, gzip:            ${await getResponseLength('/binary/sets/raw/1000000')}`);
+    console.info(`binary pairs, gzip:           ${await getResponseLength('/binary/pairs/raw/1000000', gzip)}`);
+    console.info(`binary sets, gzip:            ${await getResponseLength('/binary/sets/raw/1000000', gzip)}`);
 
     console.info(`base64 pairs, no compression: ${await getResponseLength('/binary/pairs/base64/1000000', disableCompression)}`);
-    console.info(`base64 pairs, gzip:           ${await getResponseLength('/binary/pairs/base64/1000000')}`);
-    console.info(`base64 sets, gzip:            ${await getResponseLength('/binary/sets/base64/1000000')}`);
+    console.info(`base64 pairs, gzip:           ${await getResponseLength('/binary/pairs/base64/1000000', gzip)}`);
+    console.info(`base64 sets, gzip:            ${await getResponseLength('/binary/sets/base64/1000000', gzip)}`);
 }
 
 const server = app.listen(0, 'localhost', () => {
