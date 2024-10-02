@@ -91,7 +91,7 @@ async function runTests(baseUrl: string) {
     console.info(`json, gzip:           ${await getResponseLength('/1000000/5', gzip)}`);
 
     console.info(`msgpack, no compression: ${await getResponseLength('/1000000/5', {headers: {...msgPack.headers, ...disableCompression.headers}})}`);
-    console.info(`msgpack, gzip: ${await getResponseLength('/1000000/5', {headers: {...msgPack.headers, ...gzip.headers}})}`);
+    console.info(`msgpack, gzip:           ${await getResponseLength('/1000000/5', {headers: {...msgPack.headers, ...gzip.headers}})}`);
 
     console.info(`csv, no compression: ${await getResponseLength('/csv/1000000/5', disableCompression)}`);
     console.info(`csv, gzip:           ${await getResponseLength('/csv/1000000/5', gzip)}`);
