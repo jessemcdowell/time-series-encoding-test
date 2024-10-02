@@ -3,6 +3,7 @@ import compression from 'compression';
 import msgpack from 'express-msgpack'
 import { AddressInfo } from 'node:net';
 import axios, { AxiosRequestConfig } from "axios";
+import protobuf from "protobufjs";
 
 interface Point {
     time: Date,
@@ -71,6 +72,21 @@ app.get('/csv/:pointCount(\\d+)/:decimalPlaces(\\d+)', (request, response) => {
     response.send(data);
 });
 
+
+app.get('/:pointCount(\\d+)/:decimalPlaces(\\d+)/protobuf', async (request, response) => {
+    const {pointCount, decimalPlaces} = request.params;
+    const pointArrayData = {
+        points: generatePoints(parseInt(pointCount), parseInt(decimalPlaces)).map(point => ({
+            time: point.time.getTime(),
+            value: point.value
+        }))
+    };
+
+    const PointArrayMessage = (await protobuf.load('point-array.proto')).lookupType('timeseries.PointArray');
+    response.type('application/octet-stream');
+    response.send(PointArrayMessage.encode(pointArrayData).finish());
+});
+
 async function runTests(baseUrl: string) {
     async function getResponseLength(path: string, options: Partial<AxiosRequestConfig> = {}): Promise<number> {
         let loaded = 0;
@@ -90,11 +106,14 @@ async function runTests(baseUrl: string) {
     console.info(`json, no compression: ${await getResponseLength('/1000000/5', disableCompression)}`);
     console.info(`json, gzip:           ${await getResponseLength('/1000000/5', gzip)}`);
 
+    console.info(`csv, no compression: ${await getResponseLength('/csv/1000000/5', disableCompression)}`);
+    console.info(`csv, gzip:           ${await getResponseLength('/csv/1000000/5', gzip)}`);
+
     console.info(`msgpack, no compression: ${await getResponseLength('/1000000/5', {headers: {...msgPack.headers, ...disableCompression.headers}})}`);
     console.info(`msgpack, gzip:           ${await getResponseLength('/1000000/5', {headers: {...msgPack.headers, ...gzip.headers}})}`);
 
-    console.info(`csv, no compression: ${await getResponseLength('/csv/1000000/5', disableCompression)}`);
-    console.info(`csv, gzip:           ${await getResponseLength('/csv/1000000/5', gzip)}`);
+    console.info(`protobuf, no compression: ${await getResponseLength('/1000000/5/protobuf', disableCompression)}`);
+    console.info(`protobuf, gzip:           ${await getResponseLength('/1000000/5/protobuf', gzip)}`);
 
     console.info(`binary pairs, no compression: ${await getResponseLength('/binary/pairs/raw/1000000', disableCompression)}`);
     console.info(`binary pairs, gzip:           ${await getResponseLength('/binary/pairs/raw/1000000', gzip)}`);
