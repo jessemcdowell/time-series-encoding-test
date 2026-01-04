@@ -50,12 +50,12 @@ const app = express();
 app.use(compression({filter: (req, res) => req.headers['accept-encoding']?.indexOf('gzip') !== -1}));
 app.use(msgpack());
 
-app.get('/:pointCount(\\d+)/:decimalPlaces(\\d+)', (request, response) => {
+app.get('/:pointCount/:decimalPlaces', (request, response) => {
     const {pointCount, decimalPlaces} = request.params;
     response.send(generatePoints(parseInt(pointCount), parseInt(decimalPlaces)));
 });
 
-app.get(`/binary/:structure(pairs|sets)/:encoding(raw|base64)/:pointCount(\\d+)`, (request, response) => {
+app.get(`/binary/:structure/:encoding/:pointCount`, (request, response) => {
     const {pointCount, structure, encoding} = request.params;
     const pointData = generatePoints(parseInt(pointCount), 5);
     const data = structure === 'pairs' ? encodeBinaryPairs(pointData) : encodeBinarySets(pointData);
@@ -63,7 +63,7 @@ app.get(`/binary/:structure(pairs|sets)/:encoding(raw|base64)/:pointCount(\\d+)`
     response.send(encoding === 'base64' ? data.toString('base64') : data);
 });
 
-app.get('/csv/:pointCount(\\d+)/:decimalPlaces(\\d+)', (request, response) => {
+app.get('/csv/:pointCount/:decimalPlaces', (request, response) => {
     const {pointCount, decimalPlaces} = request.params;
     const points = generatePoints(parseInt(pointCount), parseInt(decimalPlaces));
     const data = 'time,value\n' + points.map(point => `${point.time.toISOString()},${point.value}`).join('\n');
@@ -73,7 +73,7 @@ app.get('/csv/:pointCount(\\d+)/:decimalPlaces(\\d+)', (request, response) => {
 });
 
 
-app.get('/:pointCount(\\d+)/:decimalPlaces(\\d+)/protobuf', async (request, response) => {
+app.get('/:pointCount/:decimalPlaces/protobuf', async (request, response) => {
     const {pointCount, decimalPlaces} = request.params;
     const pointArrayData = {
         points: generatePoints(parseInt(pointCount), parseInt(decimalPlaces)).map(point => ({
