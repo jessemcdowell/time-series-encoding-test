@@ -20,6 +20,6 @@
     "compression": "^1.8.1",
     "express": "^5.2.1",
     "express-msgpack": "^6.0.0",
-    "protobufjs": "^8.0.0"
+    "protobufjs": "^8.0.1"
   }
 }
